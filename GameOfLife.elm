@@ -8,7 +8,7 @@ cellSize = 50
 gridSize : number
 gridSize = 500
 
-grid = (Dict.fromList [((0,0), ()), ((0, 1), ())])
+grid = (Dict.fromList [((0,0), ()), ((1, 0), ())])
 
 hasLiveCell : Dict.Dict (Int, Int) () -> (Int, Int) -> Bool
 hasLiveCell grid position = Dict.member position grid
@@ -26,13 +26,20 @@ generateGrid size =
 
     horizontalLines ++ verticalLines
 
+funColor: Color
+funColor = rgba 81 116 22 1.0
+
 generateCell : (Float, Float) -> Form
-generateCell position = move position (filled black (circle 50))
+generateCell (x, y) = move ((-gridSize/2 + x + cellSize/2, gridSize/2 - y - cellSize/2)) (filled funColor (circle (cellSize/2.5)))
+
+generateCells : [Form]
+generateCells = map generateCell (map (\(x,y) -> (x * cellSize, y * cellSize)) (Dict.keys grid))
+--generateCells = [move(-225, 225) (filled funColor (circle 25))]
 
 display : Int -> Int -> Element
 display width height = container width height middle (
                         collage gridSize gridSize
-                          (map (traced (solid black)) (generateGrid gridSize))
+                          ( map (traced (solid black)) (generateGrid gridSize) ++ generateCells )
                         )
 
 main : Signal Element
