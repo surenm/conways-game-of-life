@@ -1,14 +1,15 @@
 import Dict
 import Graphics.Collage
 import Window
+import Debug
 
 cellSize : number
-cellSize = 50
+cellSize = 20
 
 gridSize : number
 gridSize = 500
 
-grid = (Dict.fromList [((0,0), ()), ((1, 0), ())])
+grid = (Dict.fromList [((1,0), ()), ((2, 1), ()), ((0, 2), ()), ((1, 2), ()), ((2, 2), ())])
 
 hasLiveCell : Dict.Dict (Int, Int) () -> (Int, Int) -> Bool
 hasLiveCell grid position = Dict.member position grid
@@ -42,5 +43,5 @@ display width height = container width height middle (
                           ( map (traced (solid black)) (generateGrid gridSize) ++ generateCells )
                         )
 
-main : Signal Element
+main: Signal Element
 main = lift2 display Window.width Window.height
