@@ -1,0 +1,287 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>GameOfLife</title><script type="text/javascript" src="./elm-runtime.js"></script><script type="text/javascript">Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Main",
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var hasLiveCell = F2(function (grid,
+   position) {
+      return A2($Dict.member,
+      position,
+      grid);
+   });
+   var horizontalLine = F2(function (width,
+   abscissca) {
+      return $Graphics$Collage.path(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: (0 - width) / 2
+                                                  ,_1: abscissca}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: width / 2
+                                                  ,_1: abscissca}]));
+   });
+   var verticalLine = F2(function (height,
+   ordinate) {
+      return $Graphics$Collage.path(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: ordinate
+                                                  ,_1: (0 - height) / 2}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: ordinate
+                                                  ,_1: height / 2}]));
+   });
+   var initialGrid = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: {ctor: "_Tuple2"
+                                                       ,_0: 1
+                                                       ,_1: 0}
+                                                  ,_1: {ctor: "_Tuple0"}}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: {ctor: "_Tuple2"
+                                                       ,_0: 2
+                                                       ,_1: 1}
+                                                  ,_1: {ctor: "_Tuple0"}}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: {ctor: "_Tuple2"
+                                                       ,_0: 0
+                                                       ,_1: 2}
+                                                  ,_1: {ctor: "_Tuple0"}}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: {ctor: "_Tuple2"
+                                                       ,_0: 1
+                                                       ,_1: 2}
+                                                  ,_1: {ctor: "_Tuple0"}}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: {ctor: "_Tuple2"
+                                                       ,_0: 2
+                                                       ,_1: 2}
+                                                  ,_1: {ctor: "_Tuple0"}}]));
+   var add = F2(function (_v0,
+   _v1) {
+      return function () {
+         switch (_v1.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v0.ctor)
+                 {case "_Tuple2":
+                    return {ctor: "_Tuple2"
+                           ,_0: _v0._0 + _v1._0
+                           ,_1: _v0._1 + _v1._1};}
+                 _E.Case($moduleName,
+                 "on line 16, column 26 to 42");
+              }();}
+         _E.Case($moduleName,
+         "on line 16, column 26 to 42");
+      }();
+   });
+   var funColor = A4($Color.rgba,
+   81,
+   116,
+   22,
+   1.0);
+   var gridSize = 500;
+   var cellSize = 50;
+   var renderGrid = function (size) {
+      return function () {
+         var horizontalLines = A2($List.map,
+         horizontalLine(size),
+         A2($List.map,
+         function (n) {
+            return n * cellSize;
+         },
+         _L.range((0 - size) / (2 * cellSize),
+         size / (2 * cellSize))));
+         var verticalLines = A2($List.map,
+         verticalLine(size),
+         A2($List.map,
+         function (n) {
+            return n * cellSize;
+         },
+         _L.range((0 - size) / (2 * cellSize),
+         size / (2 * cellSize))));
+         return _L.append(horizontalLines,
+         verticalLines);
+      }();
+   };
+   var renderLiveCell = function (_v8) {
+      return function () {
+         switch (_v8.ctor)
+         {case "_Tuple2":
+            return A2($Graphics$Collage.move,
+              {ctor: "_Tuple2"
+              ,_0: (0 - gridSize) / 2 + _v8._0 + cellSize / 2
+              ,_1: gridSize / 2 - _v8._1 - cellSize / 2},
+              A2($Graphics$Collage.filled,
+              funColor,
+              $Graphics$Collage.circle(cellSize / 2.5)));}
+         _E.Case($moduleName,
+         "on line 35, column 25 to 130");
+      }();
+   };
+   var renderLife = function (grid) {
+      return A2($List.map,
+      renderLiveCell,
+      A2($List.map,
+      function (_v12) {
+         return function () {
+            switch (_v12.ctor)
+            {case "_Tuple2":
+               return {ctor: "_Tuple2"
+                      ,_0: _v12._0 * cellSize
+                      ,_1: _v12._1 * cellSize};}
+            _E.Case($moduleName,
+            "on line 38, column 56 to 82");
+         }();
+      },
+      $Dict.keys(grid)));
+   };
+   var display = F3(function (grid,
+   width,
+   height) {
+      return A4($Graphics$Element.container,
+      width,
+      height,
+      $Graphics$Element.middle,
+      A3($Graphics$Collage.collage,
+      gridSize,
+      gridSize,
+      _L.append(A2($List.map,
+      $Graphics$Collage.traced($Graphics$Collage.solid($Color.black)),
+      renderGrid(gridSize)),
+      renderLife(grid))));
+   });
+   var validCell = function (_v16) {
+      return function () {
+         switch (_v16.ctor)
+         {case "_Tuple2":
+            return _U.cmp(_v16._0,
+              0) > -1 && (_U.cmp(_v16._1,
+              0) > -1 && (_U.cmp(_v16._0,
+              gridSize / cellSize | 0) < 0 && _U.cmp(_v16._1,
+              gridSize / cellSize | 0) < 0));}
+         _E.Case($moduleName,
+         "on line 44, column 20 to 88");
+      }();
+   };
+   var neighbouringCells = function (position) {
+      return function () {
+         var deltas = _L.fromArray([{ctor: "_Tuple2"
+                                    ,_0: 1
+                                    ,_1: 0}
+                                   ,{ctor: "_Tuple2",_0: 1,_1: -1}
+                                   ,{ctor: "_Tuple2",_0: 0,_1: -1}
+                                   ,{ctor: "_Tuple2",_0: -1,_1: -1}
+                                   ,{ctor: "_Tuple2",_0: -1,_1: 0}
+                                   ,{ctor: "_Tuple2",_0: -1,_1: 1}
+                                   ,{ctor: "_Tuple2",_0: 0,_1: 1}
+                                   ,{ctor: "_Tuple2"
+                                    ,_0: 1
+                                    ,_1: 1}]);
+         return validCell(position) ? A2($List.filter,
+         validCell,
+         A2($List.map,
+         function (delta) {
+            return A2(add,
+            position,
+            delta);
+         },
+         deltas)) : _L.fromArray([]);
+      }();
+   };
+   var neighbouringLiveCells = F2(function (grid,
+   position) {
+      return A2($List.filter,
+      function (position) {
+         return A2(hasLiveCell,
+         grid,
+         position);
+      },
+      neighbouringCells(position));
+   });
+   var livesInNextGeneration = F2(function (grid,
+   position) {
+      return A2(hasLiveCell,
+      grid,
+      position) && _U.eq($List.length(A2(neighbouringLiveCells,
+      grid,
+      position)),
+      2) || _U.eq($List.length(A2(neighbouringLiveCells,
+      grid,
+      position)),
+      3);
+   });
+   var evolve = function (grid) {
+      return function () {
+         var ys = _L.range(0,
+         gridSize / cellSize);
+         var xs = _L.range(0,
+         gridSize / cellSize);
+         return $Dict.fromList(A2($List.filter,
+         function (pos) {
+            return A2(livesInNextGeneration,
+            grid,
+            $Basics.fst(pos));
+         },
+         $List.concat(A2($List.map,
+         function (y) {
+            return A2($List.map,
+            function (x) {
+               return {ctor: "_Tuple2"
+                      ,_0: {ctor: "_Tuple2"
+                           ,_0: x
+                           ,_1: y}
+                      ,_1: {ctor: "_Tuple0"}};
+            },
+            xs);
+         },
+         ys))));
+      }();
+   };
+   var nextGeneration = F2(function (pulse,
+   life) {
+      return evolve(life);
+   });
+   var main = A4($Signal.lift3,
+   display,
+   A3($Signal.foldp,
+   nextGeneration,
+   initialGrid,
+   $Time.fps(1)),
+   $Window.width,
+   $Window.height);
+   _elm.Main.values = {_op: _op
+                      ,cellSize: cellSize
+                      ,gridSize: gridSize
+                      ,funColor: funColor
+                      ,add: add
+                      ,initialGrid: initialGrid
+                      ,verticalLine: verticalLine
+                      ,horizontalLine: horizontalLine
+                      ,renderGrid: renderGrid
+                      ,renderLiveCell: renderLiveCell
+                      ,renderLife: renderLife
+                      ,hasLiveCell: hasLiveCell
+                      ,validCell: validCell
+                      ,neighbouringCells: neighbouringCells
+                      ,neighbouringLiveCells: neighbouringLiveCells
+                      ,livesInNextGeneration: livesInNextGeneration
+                      ,evolve: evolve
+                      ,nextGeneration: nextGeneration
+                      ,display: display
+                      ,main: main};
+   return _elm.Main.values;
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script><noscript></noscript></body></html>
