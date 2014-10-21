@@ -9,10 +9,13 @@ cellSize = 20
 gridSize : number
 gridSize = 500
 
-grid = (Dict.fromList [((1,0), ()), ((2, 1), ()), ((0, 2), ()), ((1, 2), ()), ((2, 2), ())])
+funColor: Color
+funColor = rgba 81 116 22 1.0
 
 hasLiveCell : Dict.Dict (Int, Int) () -> (Int, Int) -> Bool
 hasLiveCell grid position = Dict.member position grid
+initialGrid: Dict.Dict (number, number) ()
+initialGrid = (Dict.fromList [((1,0), ()), ((2, 1), ()), ((0, 2), ()), ((1, 2), ()), ((2, 2), ())])
 
 verticalLine : Float -> Float -> Path
 verticalLine height ordinate = path [ (ordinate, -height/2), (ordinate, height/2) ]
@@ -26,9 +29,6 @@ generateGrid size =
       horizontalLines = map (horizontalLine size) (map (\n -> n * cellSize) [(-size/(2 * cellSize))..(size/(2 * cellSize))]) in 
 
     horizontalLines ++ verticalLines
-
-funColor: Color
-funColor = rgba 81 116 22 1.0
 
 generateCell : (Float, Float) -> Form
 generateCell (x, y) = move ((-gridSize/2 + x + cellSize/2, gridSize/2 - y - cellSize/2)) (filled funColor (circle (cellSize/2.5)))
