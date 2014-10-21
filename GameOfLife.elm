@@ -14,6 +14,9 @@ funColor = rgba 81 116 22 1.0
 
 hasLiveCell : Dict.Dict (Int, Int) () -> (Int, Int) -> Bool
 hasLiveCell grid position = Dict.member position grid
+add: (number, number) -> (number, number) -> (number, number)
+add (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
+
 initialGrid: Dict.Dict (number, number) ()
 initialGrid = (Dict.fromList [((1,0), ()), ((2, 1), ()), ((0, 2), ()), ((1, 2), ()), ((2, 2), ())])
 
