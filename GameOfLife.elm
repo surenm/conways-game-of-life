@@ -9,6 +9,9 @@ cellSize = 50
 gridSize : number
 gridSize = 500
 
+gridDimension : number
+gridDimension = gridSize/cellSize
+
 funColor: Color
 funColor = rgba 81 116 22 1.0
 
@@ -28,7 +31,6 @@ renderGrid : Float -> [Path]
 renderGrid size =
   let verticalLines = map (verticalLine size) (map (\n -> n * cellSize) [(-size/(2 * cellSize))..(size/(2 * cellSize))])
       horizontalLines = map (horizontalLine size) (map (\n -> n * cellSize) [(-size/(2 * cellSize))..(size/(2 * cellSize))]) in
-
     horizontalLines ++ verticalLines
 
 renderLiveCell : (Float, Float) -> Form
@@ -41,7 +43,7 @@ hasLiveCell : Dict.Dict (number, number) () -> (number, number) -> Bool
 hasLiveCell grid position = Dict.member position grid
 
 validCell: (number, number) -> Bool
-validCell (x, y) = x >= 0 && y >= 0 && x < gridSize//cellSize && y < gridSize//cellSize
+validCell (x, y) = x >= 0 && y >= 0
 
 neighbouringCells: (number, number) -> [(number, number)]
 neighbouringCells position =
@@ -57,21 +59,14 @@ neighbouringLiveCells grid position =
 
 livesInNextGeneration:  Dict.Dict (number, number) () -> (number, number) -> Bool
 livesInNextGeneration grid position =
-  (hasLiveCell grid position && length (neighbouringLiveCells grid position) == 2) ||
-  length (neighbouringLiveCells grid position) == 3
+  (hasLiveCell grid position && length (neighbouringLiveCells grid position) == 2) || length (neighbouringLiveCells grid position) == 3
 
-evolve: Dict.Dict (number, number) () -> Dict.Dict (number, number) ()
-evolve grid =
-  let xs = [0..(gridSize/cellSize)]
-      ys = [0..(gridSize/cellSize)] in
-    Dict.fromList (filter (\pos -> livesInNextGeneration grid (fst pos)) (concat (map (\y -> map (\x -> ((x, y), ())) xs) ys)))
-
-nextGeneration pulse life = evolve life
+nextGeneration: Float -> Dict.Dict (number, number) () -> Dict.Dict (number, number) ()
+nextGeneration pulse grid =
+  Dict.fromList (filter (\pos -> livesInNextGeneration grid (fst pos)) (concat (map (\y -> map (\x -> ((x, y), ())) [0..gridDimension]) [0..gridDimension])))
 
 display : Dict.Dict (number, number) () -> Int -> Int -> Element
 display grid width height = container width height middle (
-  collage gridSize gridSize
-    ( map (traced (solid black)) (renderGrid gridSize) ++ (renderLife grid) )
-  )
+  collage gridSize gridSize ( map (traced (solid black)) (renderGrid gridSize) ++ (renderLife grid )))
 
-main = lift3 display (foldp (nextGeneration) initialGrid (fps 1)) Window.width Window.height
+main = lift3 display (foldp (nextGeneration) initialGrid (fps 3)) Window.width Window.height
