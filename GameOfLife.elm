@@ -3,24 +3,48 @@ import Graphics.Collage
 import Window
 import Debug
 
-cellSize : number
-cellSize = 50
+-- Type alias for Grid and position to represent our game
+type Position = (Float, Float)
+type Grid = Dict.Dict (Float, Float) ()
 
-gridSize : number
+newGrid: [Position] -> Grid
+newGrid ps = Dict.fromList (map (\p -> (p, ())) ps)
+
+liveCells: Grid -> [Position]
+liveCells g = Dict.keys g
+
+alive: Grid -> Position -> Bool
+alive g p = Dict.member p g
+
+validCell: Position -> Bool
+validCell (x, y) = x >= 0 && y >= 0
+
+neighbours: Position -> [Position]
+neighbours p = filter validCell (map (\d -> p `add` d) deltas)
+
+aliveNeighbours: Grid -> Position -> [Position]
+aliveNeighbours g p = filter (\p -> alive g p) (neighbours p)
+
+aliveInNextGeneration:  Grid -> Position -> Bool
+aliveInNextGeneration g p =
+  let liveNeighbors = length (aliveNeighbours g p)
+  in (alive g p && liveNeighbors == 2) || liveNeighbors == 3
+
+-- Constants. Sort of.
 gridSize = 500
-
-gridDimension : number
+cellSize = 50
 gridDimension = gridSize/cellSize
-
-funColor: Color
 funColor = rgba 81 116 22 1.0
+deltas    = [(1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1)]
+glider    = [(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)]
+positions = concat (map (\y -> map (\x -> (x, y)) [0..gridDimension]) [0..gridDimension])
+initialGrid = newGrid glider
 
-add: (number, number) -> (number, number) -> (number, number)
+-- Tuple addition helper
+add: Position -> Position -> Position
 add (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
 
-initialGrid: Dict.Dict (number, number) ()
-initialGrid = Dict.fromList [((1, 0), ()), ((2, 1), ()), ((0, 2), ()), ((1, 2), ()), ((2, 2), ())]
-
+-- Drawing helpers
 verticalLine : Float -> Float -> Path
 verticalLine height ordinate = path [ (ordinate, -height/2), (ordinate, height/2) ]
 
@@ -29,44 +53,24 @@ horizontalLine width abscissca = path [ (-width/2, abscissca), (width/2, absciss
 
 renderGrid : Float -> [Path]
 renderGrid size =
-  let verticalLines = map (verticalLine size) (map (\n -> n * cellSize) [(-size/(2 * cellSize))..(size/(2 * cellSize))])
-      horizontalLines = map (horizontalLine size) (map (\n -> n * cellSize) [(-size/(2 * cellSize))..(size/(2 * cellSize))]) in
-    horizontalLines ++ verticalLines
+  let lines = map (\n -> n * cellSize) [(-size/(2 * cellSize))..(size/(2 * cellSize))]
+  in (map (verticalLine size) lines) ++ (map (horizontalLine size) lines)
 
 renderLiveCell : (Float, Float) -> Form
-renderLiveCell (x, y) = move ((-gridSize/2 + x + cellSize/2, gridSize/2 - y - cellSize/2)) (filled funColor (circle (cellSize/2.5)))
+renderLiveCell (x, y) =
+  move (-gridSize/2 + (x * cellSize) + cellSize/2, gridSize/2 - (y * cellSize) - cellSize/2) (filled funColor (circle (cellSize/2.5)))
 
-renderLife: Dict.Dict (number, number) () -> [Form]
-renderLife  grid = map renderLiveCell (map (\(x,y) -> (x * cellSize, y * cellSize)) (Dict.keys grid))
+renderLife: Grid -> [Form]
+renderLife g = map renderLiveCell (liveCells g)
 
-hasLiveCell : Dict.Dict (number, number) () -> (number, number) -> Bool
-hasLiveCell grid position = Dict.member position grid
+-- Evolve next generation from the current generation
+nextGeneration: Float -> Grid -> Grid
+nextGeneration pulse g = newGrid (filter (\p -> aliveInNextGeneration g p) positions)
 
-validCell: (number, number) -> Bool
-validCell (x, y) = x >= 0 && y >= 0
+-- render
+render : Grid -> Int -> Int -> Element
+render g width height = container width height middle (
+  collage gridSize gridSize ( map (traced (solid black)) (renderGrid gridSize) ++ (renderLife g)))
 
-neighbouringCells: (number, number) -> [(number, number)]
-neighbouringCells position =
-  let deltas = [(1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1)] in
-    if validCell(position)
-      then filter validCell (map (\delta -> add position delta) deltas)
-    else
-      []
-
-neighbouringLiveCells: Dict.Dict (number, number) () -> (number, number) -> [(number, number)]
-neighbouringLiveCells grid position =
-  filter (\position -> hasLiveCell grid position) (neighbouringCells position)
-
-livesInNextGeneration:  Dict.Dict (number, number) () -> (number, number) -> Bool
-livesInNextGeneration grid position =
-  (hasLiveCell grid position && length (neighbouringLiveCells grid position) == 2) || length (neighbouringLiveCells grid position) == 3
-
-nextGeneration: Float -> Dict.Dict (number, number) () -> Dict.Dict (number, number) ()
-nextGeneration pulse grid =
-  Dict.fromList (filter (\pos -> livesInNextGeneration grid (fst pos)) (concat (map (\y -> map (\x -> ((x, y), ())) [0..gridDimension]) [0..gridDimension])))
-
-display : Dict.Dict (number, number) () -> Int -> Int -> Element
-display grid width height = container width height middle (
-  collage gridSize gridSize ( map (traced (solid black)) (renderGrid gridSize) ++ (renderLife grid )))
-
-main = lift3 display (foldp (nextGeneration) initialGrid (fps 3)) Window.width Window.height
+-- Render the animation now
+main = lift3 render (foldp (nextGeneration) initialGrid (fps 2)) Window.width Window.height
